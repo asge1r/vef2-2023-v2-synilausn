@@ -2,7 +2,6 @@
   "name": "vef2-2022-v2-synilausn",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "dotenv -e .env -- nodemon ./src/app.js",
