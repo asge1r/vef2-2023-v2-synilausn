@@ -1,6 +1,9 @@
 {
   "name": "vef2-2022-v2-synilausn",
   "version": "1.0.0",
+  "engines": {
+    "node": "18"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
