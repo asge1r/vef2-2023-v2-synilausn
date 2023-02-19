@@ -206,10 +206,15 @@ adminRouter.post(
   }
 );
 
-adminRouter.get('/logout', (req, res) => {
+adminRouter.get('/logout', async (req, res) => {
   // logout hendir session cookie og session
-  req.logout();
-  res.redirect('/');
+
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect('/');
+  });
 });
 
 // Verður að vera seinast svo það taki ekki yfir önnur route
