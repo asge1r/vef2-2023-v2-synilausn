@@ -27,10 +27,7 @@
     </form>
   </div>
 
-  <div class="user">
-    <p class="user__loggedin">Innskráður sem: <strong><%= username %></strong></p>
-    <p class="user__logout"><a href="/admin/logout">Útskrá</a></p>
-  </div>
+  <%- include('user') %>
 
   <div class="link">
     <a class="link__link" href="/admin">Til baka</a>

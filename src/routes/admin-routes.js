@@ -8,7 +8,7 @@ import {
   listEvents,
   updateEvent,
 } from '../lib/db.js';
-import passport, { ensureLoggedIn } from '../lib/login.js';
+import { ensureAdmin, ensureLoggedIn } from '../lib/login.js';
 import { slugify } from '../lib/slugify.js';
 import {
   registrationValidationMiddleware,
@@ -20,10 +20,10 @@ export const adminRouter = express.Router();
 
 async function index(req, res) {
   const events = await listEvents();
-  const { user: { username } = {} } = req || {};
+  const { user } = req;
 
   return res.render('admin', {
-    username,
+    user,
     events,
     errors: [],
     data: {},
@@ -32,28 +32,11 @@ async function index(req, res) {
   });
 }
 
-function login(req, res) {
-  if (req.isAuthenticated()) {
-    return res.redirect('/admin');
-  }
-
-  let message = '';
-
-  // Athugum hvort einhver skilaboð séu til í session, ef svo er birtum þau
-  // og hreinsum skilaboð
-  if (req.session.messages && req.session.messages.length > 0) {
-    message = req.session.messages.join(', ');
-    req.session.messages = [];
-  }
-
-  return res.render('login', { message, title: 'Innskráning' });
-}
-
 async function validationCheck(req, res, next) {
   const { name, description } = req.body;
 
   const events = await listEvents();
-  const { user: { username } = {} } = req;
+  const { user } = req;
 
   const data = {
     name,
@@ -76,7 +59,7 @@ async function validationCheck(req, res, next) {
   if (!validation.isEmpty() || customValidations.length > 0) {
     return res.render('admin', {
       events,
-      username,
+      user,
       title: 'Viðburðir — umsjón',
       data,
       errors: validation.errors.concat(customValidations),
@@ -90,7 +73,7 @@ async function validationCheck(req, res, next) {
 async function validationCheckUpdate(req, res, next) {
   const { name, description } = req.body;
   const { slug } = req.params;
-  const { user: { username } = {} } = req;
+  const { user } = req;
 
   const event = await listEvent(slug);
 
@@ -114,7 +97,7 @@ async function validationCheckUpdate(req, res, next) {
 
   if (!validation.isEmpty() || customValidations.length > 0) {
     return res.render('admin-event', {
-      username,
+      user,
       event,
       title: 'Viðburðir — umsjón',
       data,
@@ -162,7 +145,7 @@ async function updateRoute(req, res) {
 
 async function eventRoute(req, res, next) {
   const { slug } = req.params;
-  const { user: { username } = {} } = req;
+  const { user } = req;
 
   const event = await listEvent(slug);
 
@@ -171,7 +154,7 @@ async function eventRoute(req, res, next) {
   }
 
   return res.render('admin-event', {
-    username,
+    user,
     title: `${event.name} — Viðburðir — umsjón`,
     event,
     errors: [],
@@ -179,10 +162,11 @@ async function eventRoute(req, res, next) {
   });
 }
 
-adminRouter.get('/', ensureLoggedIn, catchErrors(index));
+adminRouter.get('/', ensureLoggedIn, ensureAdmin, catchErrors(index));
 adminRouter.post(
   '/',
   ensureLoggedIn,
+  ensureAdmin,
   registrationValidationMiddleware('description'),
   xssSanitizationMiddleware('description'),
   catchErrors(validationCheck),
@@ -190,38 +174,12 @@ adminRouter.post(
   catchErrors(registerRoute)
 );
 
-adminRouter.get('/login', login);
-adminRouter.post(
-  '/login',
-
-  // Þetta notar strat að ofan til að skrá notanda inn
-  passport.authenticate('local', {
-    failureMessage: 'Notandanafn eða lykilorð vitlaust.',
-    failureRedirect: '/admin/login',
-  }),
-
-  // Ef við komumst hingað var notandi skráður inn, senda á /admin
-  (req, res) => {
-    res.redirect('/admin');
-  }
-);
-
-adminRouter.get('/logout', async (req, res) => {
-  // logout hendir session cookie og session
-
-  req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.redirect('/');
-  });
-});
-
 // Verður að vera seinast svo það taki ekki yfir önnur route
-adminRouter.get('/:slug', ensureLoggedIn, catchErrors(eventRoute));
+adminRouter.get('/:slug', ensureLoggedIn, ensureAdmin, catchErrors(eventRoute));
 adminRouter.post(
   '/:slug',
   ensureLoggedIn,
+  ensureAdmin,
   registrationValidationMiddleware('description'),
   xssSanitizationMiddleware('description'),
   catchErrors(validationCheckUpdate),

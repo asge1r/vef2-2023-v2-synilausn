@@ -11,9 +11,11 @@ import {
 export const indexRouter = express.Router();
 
 async function indexRoute(req, res) {
+  const { user } = req;
   const events = await listEvents();
 
   res.render('index', {
+    user,
     title: 'Viðburðasíðan',
     admin: false,
     events,
@@ -22,6 +24,8 @@ async function indexRoute(req, res) {
 
 async function eventRoute(req, res, next) {
   const { slug } = req.params;
+  const { user } = req;
+
   const event = await listEvent(slug);
 
   if (!event) {
@@ -31,6 +35,7 @@ async function eventRoute(req, res, next) {
   const registered = await listRegistered(event.id);
 
   return res.render('event', {
+    user,
     title: `${event.name} — Viðburðasíðan`,
     event,
     registered,
@@ -40,15 +45,18 @@ async function eventRoute(req, res, next) {
 }
 
 async function eventRegisteredRoute(req, res) {
+  const { user } = req;
   const events = await listEvents();
 
   res.render('registered', {
+    user,
     title: 'Viðburðasíðan',
     events,
   });
 }
 
 async function validationCheck(req, res, next) {
+  const { user } = req;
   const { name, comment } = req.body;
 
   // TODO tvítekning frá því að ofan
@@ -65,6 +73,7 @@ async function validationCheck(req, res, next) {
 
   if (!validation.isEmpty()) {
     return res.render('event', {
+      user,
       title: `${event.name} — Viðburðasíðan`,
       data,
       event,
@@ -77,11 +86,13 @@ async function validationCheck(req, res, next) {
 }
 
 async function registerRoute(req, res) {
+  const { user } = req;
   const { name, comment } = req.body;
   const { slug } = req.params;
   const event = await listEvent(slug);
 
   const registered = await register({
+    user,
     name,
     comment,
     event: event.id,

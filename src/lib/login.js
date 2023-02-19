@@ -15,7 +15,6 @@ import { comparePasswords, findById, findByUsername } from './users.js';
 async function strat(username, password, done) {
   try {
     const user = await findByUsername(username);
-
     if (!user) {
       return done(null, false);
     }
@@ -44,6 +43,9 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await findById(id);
+
+    // Pössum að lykilorð geti ekki birtst neinstaðar
+    delete user.password;
     done(null, user);
   } catch (err) {
     done(err);
@@ -57,7 +59,16 @@ export function ensureLoggedIn(req, res, next) {
     return next();
   }
 
-  return res.redirect('/admin/login');
+  return res.redirect('/login');
+}
+
+export function ensureAdmin(req, res, next) {
+  if (req.isAuthenticated() && req.user?.admin) {
+    return next();
+  }
+
+  const title = 'Síða fannst ekki';
+  return res.status(404).render('error', { title });
 }
 
 export default passport;

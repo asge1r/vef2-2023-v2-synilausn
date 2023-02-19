@@ -36,9 +36,8 @@ export async function query(q, values = []) {
     const result = await client.query(q, values);
     return result;
   } catch (e) {
-    if (nodeEnv !== 'test') {
-      console.error('unable to query', e);
-    }
+    console.error('unable to query', e);
+    console.info(q, values);
     return null;
   } finally {
     client.release();

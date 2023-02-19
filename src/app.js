@@ -7,6 +7,7 @@ import passport from './lib/login.js';
 import { isInvalid } from './lib/template-helpers.js';
 import { adminRouter } from './routes/admin-routes.js';
 import { indexRouter } from './routes/index-routes.js';
+import { userRouter } from './routes/user-routes.js';
 
 dotenv.config();
 
@@ -49,6 +50,9 @@ app.locals = {
 };
 
 app.use('/admin', adminRouter);
+
+// Verður að vera fyrir ofan `indexRouter` vegna catch-all route þar
+app.use('/', userRouter);
 app.use('/', indexRouter);
 
 /** Middleware sem sér um 404 villur. */
