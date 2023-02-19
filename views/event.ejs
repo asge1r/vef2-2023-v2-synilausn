@@ -25,28 +25,23 @@
   </div>
   <div class="event__registration">
     <h2 class="event__subtitle">Skráðu þig</h2>
-    <form method="post" action="/<%= event.slug %>" enctype="application/x-www-form-urlencoded" class="">
-      <div class="field field--input<%= locals.isInvalid('name', errors) ?  ' field--invalid' : '' %>">
-        <label for="name">Nafn*:</label>
-        <input type="text" name="name" id="name">
-      </div>
+    <% if (user) { %>
+      <% if (userRegistration) { %>
+        <p>Þú hefur skráð þig á þennan viðburð.</p>
+      <% } else { %>
+        <form method="post" action="/<%= event.slug %>" enctype="application/x-www-form-urlencoded" class="">
 
-      <div class="field field--textarea<%= locals.isInvalid('comment', errors) ?  ' field--invalid' : '' %>">
-        <label for="comment">Athugasemd:</label>
-        <textarea name="comment" id="comment"><%= data.comment %></textarea>
-      </div>
+          <div class="field field--textarea<%= locals.isInvalid('comment', errors) ?  ' field--invalid' : '' %>">
+            <label for="comment">Athugasemd:</label>
+            <textarea name="comment" id="comment"><%= data.comment %></textarea>
+          </div>
 
-      <% if (errors.length > 0) { %>
-        <h3 class="errors__title">Villur við skráningu:</h3>
-        <ul class="errors">
-          <% errors.forEach((error) => { %>
-            <li class="error"><label for="<%= error.param %>"><%= error.msg %></label></li>
-          <% }); %>
-        </ul>
+          <button class="button">Skrá mig</button>
+        </form>
       <% } %>
-
-      <button class="button">Skrá mig</button>
-    </form>
+    <% } else { %>
+      <p class="event__login"><a href="/login">Skráðu þig</a> inn til að skrá þig á viðburðinn.</p>
+    <% } %>
   </div>
   <div class="link">
     <a class="link__link" href="/">Til baka</a>

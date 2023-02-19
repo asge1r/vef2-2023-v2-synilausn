@@ -14,11 +14,11 @@ Byggir á sýnilausn á verkefni 2 frá því 2022 og breytir/lagar eftirfarandi
   - Passar að aðeins notendur með `admin=true` í gagnagrunni geti skráð, breytt og eytt viðburðum.
   - Ef innskráður notandi reynir að fara á stjórnandasíðu er `404` skilað.
   - Bætir við nýskráningu á _aðeins_ venjulegum notendum.
-- TODO
-  - Bætir við að aðeins innskráðir notendur geti skráð sig á viðburði.
-  - Lagar villu í nýskráningum á viðburði.
-  - Bætir við að hægt sé að eyða viðburðum.
   - Bætir við staðsetningu og slóð í viðburðaskráningu.
+  - Lagar villu í nýskráningum á viðburði.
+  - Bætir við að aðeins innskráðir notendur geti skráð sig á viðburði.
+- TODO
+  - Bætir við að hægt sé að eyða viðburðum.
   - Bætir við paging á viðburðum.
   - Bætir við testum fyrir nýja virkni.
 

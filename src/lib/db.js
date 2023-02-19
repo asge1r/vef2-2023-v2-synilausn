@@ -56,15 +56,21 @@ export async function dropSchema(dropFile = DROP_SCHEMA_FILE) {
   return query(data.toString('utf-8'));
 }
 
-export async function createEvent({ name, slug, description } = {}) {
+export async function createEvent({
+  name,
+  slug,
+  location,
+  url,
+  description,
+} = {}) {
   const q = `
     INSERT INTO events
-      (name, slug, description)
+      (name, slug, location, url, description)
     VALUES
-      ($1, $2, $3)
+      ($1, $2, $3, $4, $5)
     RETURNING id, name, slug, description;
   `;
-  const values = [name, slug, description];
+  const values = [name, slug, location, url, description];
   const result = await query(q, values);
 
   if (result && result.rowCount === 1) {
@@ -74,20 +80,24 @@ export async function createEvent({ name, slug, description } = {}) {
   return null;
 }
 
-// Updatear ekki description, erum ekki að útfæra partial update
-export async function updateEvent(id, { name, slug, description } = {}) {
+export async function updateEvent(
+  id,
+  { name, slug, location, url, description } = {}
+) {
   const q = `
     UPDATE events
       SET
         name = $1,
         slug = $2,
-        description = $3,
+        location = $3,
+        url = $4,
+        description = $5,
         updated = CURRENT_TIMESTAMP
     WHERE
-      id = $4
+      id = $6
     RETURNING id, name, slug, description;
   `;
-  const values = [name, slug, description, id];
+  const values = [name, slug, location, url, description, id];
   const result = await query(q, values);
 
   if (result && result.rowCount === 1) {
@@ -97,16 +107,16 @@ export async function updateEvent(id, { name, slug, description } = {}) {
   return null;
 }
 
-export async function register({ name, comment, event } = {}) {
+export async function register({ userId, eventId, comment } = {}) {
   const q = `
     INSERT INTO registrations
-      (name, comment, event)
+      (comment, event, userId)
     VALUES
       ($1, $2, $3)
     RETURNING
-      id, name, comment, event;
+      id, comment, event, userId;
   `;
-  const values = [name, comment, event];
+  const values = [comment, eventId, userId];
   const result = await query(q, values);
 
   if (result && result.rowCount === 1) {
@@ -119,7 +129,7 @@ export async function register({ name, comment, event } = {}) {
 export async function listEvents() {
   const q = `
     SELECT
-      id, name, slug, description, created, updated
+      id, name, slug, location, url, description, created, updated
     FROM
       events
   `;
@@ -136,7 +146,7 @@ export async function listEvents() {
 export async function listEvent(slug) {
   const q = `
     SELECT
-      id, name, slug, description, created, updated
+      id, name, slug, description, location, url, created, updated
     FROM
       events
     WHERE slug = $1
@@ -155,7 +165,7 @@ export async function listEvent(slug) {
 export async function listEventByName(name) {
   const q = `
     SELECT
-      id, name, slug, description, created, updated
+      id, name, slug, location, url, description, created, updated
     FROM
       events
     WHERE name = $1
@@ -173,9 +183,14 @@ export async function listEventByName(name) {
 export async function listRegistered(event) {
   const q = `
     SELECT
-      id, name, comment
+      users.id as id,
+      users.username as username,
+      users.name as name,
+      registrations.comment as comment
     FROM
       registrations
+    LEFT JOIN
+      users ON users.id = registrations.userId
     WHERE event = $1
   `;
 
@@ -183,6 +198,36 @@ export async function listRegistered(event) {
 
   if (result) {
     return result.rows;
+  }
+
+  return null;
+}
+
+export async function findRegistrationForUser({ userId, eventId }) {
+  const q = `
+    SELECT
+      id
+    FROM
+      registrations
+    WHERE event = $1 AND userid = $2
+  `;
+
+  const result = await query(q, [eventId, userId]);
+
+  if (result?.rowCount === 1) {
+    return result.rows[0];
+  }
+
+  return null;
+}
+
+export async function deleteRegistrationForUser({ userId, eventId }) {
+  const q = 'DELETE FROM registrations WHERE event = $1 AND userid = $2';
+
+  const result = await query(q, [eventId, userId]);
+
+  if (result && result.rowCount >= 1) {
+    return true;
   }
 
   return null;

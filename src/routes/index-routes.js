@@ -1,12 +1,14 @@
 import express from 'express';
-import { validationResult } from 'express-validator';
+import { body, validationResult } from 'express-validator';
+import xss from 'xss';
 import { catchErrors } from '../lib/catch-errors.js';
-import { listEvent, listEvents, listRegistered, register } from '../lib/db.js';
 import {
-  registrationValidationMiddleware,
-  sanitizationMiddleware,
-  xssSanitizationMiddleware,
-} from '../lib/validation.js';
+  findRegistrationForUser,
+  listEvent,
+  listEvents,
+  listRegistered,
+  register,
+} from '../lib/db.js';
 
 export const indexRouter = express.Router();
 
@@ -33,12 +35,16 @@ async function eventRoute(req, res, next) {
   }
 
   const registered = await listRegistered(event.id);
+  const userRegistration = user
+    ? await findRegistrationForUser({ userId: user.id, eventId: event.id })
+    : null;
 
   return res.render('event', {
     user,
     title: `${event.name} — Viðburðasíðan`,
     event,
     registered,
+    userRegistration,
     errors: [],
     data: {},
   });
@@ -59,7 +65,6 @@ async function validationCheck(req, res, next) {
   const { user } = req;
   const { name, comment } = req.body;
 
-  // TODO tvítekning frá því að ofan
   const { slug } = req.params;
   const event = await listEvent(slug);
   const registered = await listRegistered(event.id);
@@ -78,6 +83,7 @@ async function validationCheck(req, res, next) {
       data,
       event,
       registered,
+      userRegistration: null,
       errors: validation.errors,
     });
   }
@@ -87,15 +93,14 @@ async function validationCheck(req, res, next) {
 
 async function registerRoute(req, res) {
   const { user } = req;
-  const { name, comment } = req.body;
+  const { comment } = req.body;
   const { slug } = req.params;
   const event = await listEvent(slug);
 
   const registered = await register({
-    user,
-    name,
+    userId: user.id,
+    eventId: event.id,
     comment,
-    event: event.id,
   });
 
   if (registered) {
@@ -109,10 +114,12 @@ indexRouter.get('/', catchErrors(indexRoute));
 indexRouter.get('/:slug', catchErrors(eventRoute));
 indexRouter.post(
   '/:slug',
-  registrationValidationMiddleware('comment'),
-  xssSanitizationMiddleware('comment'),
+  body('comment')
+    .isLength({ max: 400 })
+    .withMessage('Athugasemd má að hámarki vera 400 stafir'),
+  body('comment').customSanitizer((v) => xss(v)),
   catchErrors(validationCheck),
-  sanitizationMiddleware('comment'),
+  body('comment').trim().escape(),
   catchErrors(registerRoute)
 );
 indexRouter.get('/:slug/thanks', catchErrors(eventRegisteredRoute));
