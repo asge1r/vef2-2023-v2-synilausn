@@ -6,8 +6,11 @@
         <a href="/<%= event.slug %>" class="events__eventLink"><%= event.name %></a>
         <p class="events__eventDescription"><%= event.description %></p>
         <% if (admin) { %>
-          <p><a href="/admin/<%= event.slug %>" class="events__eventEdit">Uppfæra viðburð</a>
-        <% } %>
+          <p><a href="/admin/<%= event.slug %>" class="events__eventEdit">Uppfæra viðburð</a></p>
+          <form action="/admin/delete/<%= event.id %>" method="POST" class="events__eventDelete">
+            <button class="button button--small events__eventDeleteButton">Eyða viðburði</button>
+          </form>
+          <% } %>
       </li>
     <% } %>
   </ul>

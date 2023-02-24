@@ -83,18 +83,17 @@ const registerValidation = [
 async function validationCheck(req, res, next) {
   const { name, username } = req.body;
 
-  const data = {
-    name,
-    username,
-  };
-
   const validation = validationResult(req);
 
   if (!validation.isEmpty()) {
+    const data = {
+      name,
+      username,
+    };
+
     return res.render('register', {
       title: 'Nýskráning — Viðburðasíðan',
       data,
-      // registered,
       errors: validation.errors,
     });
   }

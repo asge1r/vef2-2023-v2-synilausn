@@ -233,6 +233,34 @@ export async function deleteRegistrationForUser({ userId, eventId }) {
   return null;
 }
 
+/**
+ * Eyðir viðburði og skráningum úr gagnagrunni.
+ * Keyrir í transaction þ.a. ef það kemur upp villa við að eyða skráningum er
+ * viðburð ekki eytt og öfugt.
+ * @see https://node-postgres.com/features/transactions
+ * @param {number} eventId Id of event to delete
+ */
+export async function deleteEvent(eventId) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const deleteRegistrations = 'DELETE FROM registrations WHERE event = $1';
+    await client.query(deleteRegistrations, [eventId]);
+
+    const deleteEventQuery = 'DELETE FROM events WHERE id = $1';
+    await client.query(deleteEventQuery, [eventId]);
+    const res = await client.query('COMMIT');
+    console.log(res, eventId);
+    return true;
+  } catch (e) {
+    await client.query('ROLLBACK');
+    console.error('unable to delete event', e);
+    return false;
+  } finally {
+    client.release();
+  }
+}
+
 export async function end() {
   await pool.end();
 }

@@ -98,6 +98,10 @@ section {
   color: var(--color-white);
 }
 
+.button--small {
+  width: auto;
+}
+
 .button--margin {
   margin-top: 1rem;
 }
@@ -133,6 +137,10 @@ section {
 .events__eventDescription {
   display: block;
   font-style: italic;
+}
+
+.events__eventDeleteButton {
+  margin-block: 0.5rem;
 }
 
 /** VIÐBURÐUR **/

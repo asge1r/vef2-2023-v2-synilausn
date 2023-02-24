@@ -17,16 +17,16 @@ Byggir á sýnilausn á verkefni 2 frá því 2022 og breytir/lagar eftirfarandi
   - Bætir við staðsetningu og slóð í viðburðaskráningu.
   - Lagar villu í nýskráningum á viðburði.
   - Bætir við að aðeins innskráðir notendur geti skráð sig á viðburði.
-- TODO
   - Bætir við að hægt sé að eyða viðburðum.
+- TODO
   - Bætir við paging á viðburðum.
   - Bætir við testum fyrir nýja virkni.
 
 ## Keyrsla
 
 ```bash
-createdb vef2-2022-v2
-createdb vef2-2022-v2-test
+createdb vef2-2023-v2
+createdb vef2-2023-v2-test
 # setja upp .env & .env.test með tengingu í gagnagrunna
 npm install
 npm run test

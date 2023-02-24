@@ -3,6 +3,7 @@ import { validationResult } from 'express-validator';
 import { catchErrors } from '../lib/catch-errors.js';
 import {
   createEvent,
+  deleteEvent,
   listEvent,
   listEventByName,
   listEvents,
@@ -171,6 +172,18 @@ async function eventRoute(req, res, next) {
   });
 }
 
+async function deleteRoute(req, res, next) {
+  const { id } = req.params;
+
+  const result = await deleteEvent(id);
+
+  if (result) {
+    return res.redirect('/admin');
+  }
+
+  return next(new Error('Villa við að eyða viðburði'));
+}
+
 adminRouter.get('/', /* ensureLoggedIn, ensureAdmin, */ catchErrors(index));
 adminRouter.post(
   '/',
@@ -197,4 +210,11 @@ adminRouter.post(
   catchErrors(validationCheckUpdate),
   sanitizationMiddleware('description'),
   catchErrors(updateRoute)
+);
+
+adminRouter.post(
+  '/delete/:id',
+  // ensureLoggedIn,
+  // ensureAdmin,
+  catchErrors(deleteRoute)
 );
