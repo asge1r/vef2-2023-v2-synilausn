@@ -9,16 +9,21 @@ import {
   listRegistered,
   register,
 } from '../lib/db.js';
+import { pagingInfo } from '../lib/paging.js';
 
 export const indexRouter = express.Router();
 
 async function indexRoute(req, res) {
+  const { page: pageQuery } = req.query;
   const { user } = req;
-  const events = await listEvents();
+
+  const paging = await pagingInfo(pageQuery);
+  const events = await listEvents(paging.page);
 
   res.render('index', {
     user,
     title: 'Viðburðasíðan',
+    paging,
     admin: false,
     events,
   });

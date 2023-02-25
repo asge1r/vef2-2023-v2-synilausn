@@ -4,6 +4,12 @@
   <div class="event__info">
     <h1 class="event__title"><%= event.name %></h1>
     <p class="event__description"><%= event.description %></p>
+    <% if (event.location) { %>
+      <p class="event__location"><strong>Staðsetning: </strong><%= event.location %></p>
+    <% } %>
+    <% if (event.url) { %>
+      <p class="event__url"><strong>URL: </strong><a href="<%= event.url %>"><%= event.url %></a></p>
+    <% } %>
   </div>
 
   <div class="event__registered">

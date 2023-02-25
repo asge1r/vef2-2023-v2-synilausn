@@ -14,4 +14,12 @@
       </li>
     <% } %>
   </ul>
+  <p>Síða <%= paging.page %> af <%= paging.total %></p>
+  <% if (paging.hasPrevious) { %>
+    <a href="<%= admin ? '/admin' : '/' %>?page=<%= paging.previous %>" class="events__next">Fyrri viðburðir</a>
+  <% } %>
+  <% if (paging.hasNext) { %>
+    <a href="<%= admin ? '/admin' : '/' %>?page=<%= paging.next %>" class="events__next">Næstu viðburðir</a>
+  <% } %>
+
 </section>

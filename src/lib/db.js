@@ -126,18 +126,34 @@ export async function register({ userId, eventId, comment } = {}) {
   return null;
 }
 
-export async function listEvents() {
+export async function listEvents(page = 1) {
   const q = `
     SELECT
       id, name, slug, location, url, description, created, updated
     FROM
       events
+    ORDER BY updated DESC
+    OFFSET $1 LIMIT $2
   `;
 
-  const result = await query(q);
+  const PAGE_SIZE = 10;
+  const offset = (page - 1) * PAGE_SIZE;
+  const limit = PAGE_SIZE;
+  const result = await query(q, [offset, limit]);
 
   if (result) {
     return result.rows;
+  }
+
+  return null;
+}
+
+export async function countEvents() {
+  const q = 'SELECT COUNT(*) AS count FROM events';
+  const result = await query(q);
+
+  if (result) {
+    return result.rows[0].count;
   }
 
   return null;
@@ -249,8 +265,8 @@ export async function deleteEvent(eventId) {
 
     const deleteEventQuery = 'DELETE FROM events WHERE id = $1';
     await client.query(deleteEventQuery, [eventId]);
-    const res = await client.query('COMMIT');
-    console.log(res, eventId);
+    await client.query('COMMIT');
+
     return true;
   } catch (e) {
     await client.query('ROLLBACK');

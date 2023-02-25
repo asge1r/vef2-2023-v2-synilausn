@@ -9,6 +9,8 @@ import {
   listEvents,
   updateEvent,
 } from '../lib/db.js';
+import { ensureAdmin, ensureLoggedIn } from '../lib/login.js';
+import { pagingInfo } from '../lib/paging.js';
 import { slugify } from '../lib/slugify.js';
 import {
   registrationValidationMiddleware,
@@ -19,12 +21,16 @@ import {
 export const adminRouter = express.Router();
 
 async function index(req, res) {
-  const events = await listEvents();
+  const { page: pageQuery } = req.query;
   const { user } = req;
+
+  const paging = await pagingInfo(pageQuery);
+  const events = await listEvents(paging.page);
 
   return res.render('admin', {
     user,
     events,
+    paging,
     errors: [],
     data: {},
     title: 'Viðburðir — umsjón',
@@ -184,11 +190,11 @@ async function deleteRoute(req, res, next) {
   return next(new Error('Villa við að eyða viðburði'));
 }
 
-adminRouter.get('/', /* ensureLoggedIn, ensureAdmin, */ catchErrors(index));
+adminRouter.get('/', ensureLoggedIn, ensureAdmin, catchErrors(index));
 adminRouter.post(
   '/',
-  // ensureLoggedIn,
-  // ensureAdmin,
+  ensureLoggedIn,
+  ensureAdmin,
   registrationValidationMiddleware('description'),
   xssSanitizationMiddleware('description'),
   catchErrors(validationCheck),
@@ -197,14 +203,11 @@ adminRouter.post(
 );
 
 // Verður að vera seinast svo það taki ekki yfir önnur route
-adminRouter.get(
-  '/:slug',
-  /* ensureLoggedIn, ensureAdmin, */ catchErrors(eventRoute)
-);
+adminRouter.get('/:slug', ensureLoggedIn, ensureAdmin, catchErrors(eventRoute));
 adminRouter.post(
   '/:slug',
-  // ensureLoggedIn,
-  // ensureAdmin,
+  ensureLoggedIn,
+  ensureAdmin,
   registrationValidationMiddleware('description'),
   xssSanitizationMiddleware('description'),
   catchErrors(validationCheckUpdate),
@@ -214,7 +217,7 @@ adminRouter.post(
 
 adminRouter.post(
   '/delete/:id',
-  // ensureLoggedIn,
-  // ensureAdmin,
+  ensureLoggedIn,
+  ensureAdmin,
   catchErrors(deleteRoute)
 );

@@ -18,8 +18,8 @@ Byggir á sýnilausn á verkefni 2 frá því 2022 og breytir/lagar eftirfarandi
   - Lagar villu í nýskráningum á viðburði.
   - Bætir við að aðeins innskráðir notendur geti skráð sig á viðburði.
   - Bætir við að hægt sé að eyða viðburðum.
-- TODO
   - Bætir við paging á viðburðum.
+- TODO
   - Bætir við testum fyrir nýja virkni.
 
 ## Keyrsla
